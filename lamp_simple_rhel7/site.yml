@@ -21,3 +21,10 @@
 
   roles:
     - db
+
+- name: deploy MS SQL and configure the databases
+  hosts: mssqlservers
+  remote_user: root
+
+  roles:
+    - mssql
