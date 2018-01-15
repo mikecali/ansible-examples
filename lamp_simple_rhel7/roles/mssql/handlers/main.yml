@@ -1,0 +1,5 @@
+---
+# Handler to handle DB tier notifications
+
+- name: restart mssql
+  service: name={{ mssqlservice }} state=restarted
