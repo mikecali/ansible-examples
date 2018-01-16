@@ -1,15 +1,34 @@
 ---
 # This playbook will install Microsoft SQL Server and create db user and give permissions.
 
+- name: Enable the Microsoft Signing Key
+  rpm_key:
+    state: present
+    key: https://packages.microsoft.com/keys/microsoft.asc
+
 - name: Enable the Microsoft SQL repository
   get_url:
-    url=https://packages.microsoft.com/config/rhel/7/mssql-server-2017.repo
-    dest=/etc/yum.repos.d/mssql-server.repo
+    url: https://packages.microsoft.com/config/rhel/7/mssql-server-2017.repo
+    dest: /etc/yum.repos.d/mssql-server.repo
+
+- name: Enable the Microsoft Signing Key
+  rpm_key:
+    state: present
+    key: https://packages.microsoft.com/keys/microsoft.asc
 
 - name: Install Microsoft SQL package
   yum: name={{ item }} state=installed
   with_items:
    - mssql-server
+
+- name: Execute mssql-conf
+  command: /opt/mssql/bin/mssql-conf -n setup
+  args:
+    creates: /var/opt/mssql/mssql.conf
+  environment:
+    ACCEPT_EULA: "y"
+    MSSQL_PID: "{{ product_id }}"
+    MSSQL_SA_PASSWORD: "{{ sa_password }}"
 
 #- name: Configure #SELinux to start mysql on any port
   #seboolean: name=mysql_connect_any state=true persistent=yes
@@ -25,7 +44,7 @@
 #- name: Create MariaDB PID directory
   #file: path=/var/run/mysqld state=directory owner=mysql group=mysql mode=0775
 
-- name: Start MariaDB Service
+#- name: Start MariaDB Service
   #service: name={{ mssqlservice }} state=started enabled=yes
 
 - name: Start firewalld
